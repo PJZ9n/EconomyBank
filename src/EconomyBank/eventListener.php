@@ -24,7 +24,9 @@
         {
             $player = $event->getPlayer();
             $name = $player->getName();
-            $this->plugin->money->set($name, 0);
+            if (!$this->plugin->money->exists($name)) {
+                $this->plugin->money->set($name, 0);
+            }
         }
 
         public function onDataPacketReceive(DataPacketReceiveEvent $event)
@@ -118,7 +120,7 @@
                         $money = EconomyAPI::getInstance()->myMoney($player);
                         //$bank_money = $this->plugin->money->get($name);
                         $in_money = $formData[1];
-                        if (is_numeric($in_money)) {
+                        if (is_numeric($in_money) && $in_money > 0) {
                             if ($in_money <= $money) {
                                 EconomyAPI::getInstance()->reduceMoney($player, $in_money);
                                 $this->plugin->money->set($name, $this->plugin->money->get($name) + $in_money);
@@ -127,13 +129,13 @@
                                 $player->sendMessage(main::ERROR_TAG . "所持金が不足しています！");
                             }
                         } else {
-                            $player->sendMessage(main::ERROR_TAG . "金額は数値である必要があります！");
+                            $player->sendMessage(main::ERROR_TAG . "金額が不正です！");
                         }
                     } else if ($formId === $this->plugin->formId[2]) {
                         //$money = EconomyAPI::getInstance()->myMoney($player);
                         $bank_money = $this->plugin->money->get($name);
                         $out_money = $formData[1];
-                        if (is_numeric($out_money)) {
+                        if (is_numeric($out_money) && $out_money > 0) {
                             if ($out_money <= $bank_money) {
                                 EconomyAPI::getInstance()->addMoney($player, $out_money);
                                 $this->plugin->money->set($name, $this->plugin->money->get($name) - $out_money);
@@ -142,7 +144,7 @@
                                 $player->sendMessage(main::ERROR_TAG . "預金が不足しています！");
                             }
                         } else {
-                            $player->sendMessage(main::ERROR_TAG . "金額は数値である必要があります！");
+                            $player->sendMessage(main::ERROR_TAG . "金額が不正です！");
                         }
                     }
                 }
